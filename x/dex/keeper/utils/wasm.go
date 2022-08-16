@@ -10,6 +10,7 @@ import (
 )
 
 func CallContractSudo(sdkCtx sdk.Context, k *keeper.Keeper, contractAddr string, msg interface{}) ([]byte, error) {
+	fmt.Println(contractAddr)
 	contractAddress, err := sdk.AccAddressFromBech32(contractAddr)
 	fmt.Println("TIME: CallContractSudo Start", time.Now().UTC().UnixMilli())
 	if err != nil {
