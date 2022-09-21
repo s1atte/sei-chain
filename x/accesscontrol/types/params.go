@@ -35,8 +35,8 @@ func NewParams(messageDependencyMapping []MessageDependencyMapping) Params {
 func DefaultParams() Params {
 	return NewParams([]MessageDependencyMapping{
 		{
-			MessageType: MessageType_ANY_MESSAGE,
-			ModuleName: Module_ANY_MODULE,
+			MessageType:          MessageType_ANY_MESSAGE,
+			ModuleName:           Module_ANY_MODULE,
 			ResourceDependencies: []string{ResourceType_ANY.String()},
 		},
 	})
