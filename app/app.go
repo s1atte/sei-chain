@@ -886,6 +886,14 @@ func (app *App) ProcessProposalHandler(ctx sdk.Context, req *abci.RequestProcess
 	}, nil
 }
 
+// cacheContext returns a new context based off of the provided context with
+// a branched multi-store.
+func (app *App) CacheContext(ctx sdk.Context) (sdk.Context, sdk.CacheMultiStore) {
+	ms := ctx.MultiStore()
+	msCache := ms.CacheMultiStore()
+	return ctx.WithMultiStore(msCache), msCache
+}
+
 func (app *App) FinalizeBlocker(ctx sdk.Context, req *abci.RequestFinalizeBlock) (*abci.ResponseFinalizeBlock, error) {
 	startTime := time.Now()
 	defer func() {
@@ -907,6 +915,7 @@ func (app *App) FinalizeBlocker(ctx sdk.Context, req *abci.RequestFinalizeBlock)
 		}
 	}
 	ctx.Logger().Info("optimistic processing ineligible")
+
 	events, txResults, endBlockResp, _ := app.ProcessBlock(ctx, req.Txs, req, req.DecidedLastCommit)
 
 	app.SetDeliverStateToCommit()
@@ -1083,7 +1092,12 @@ func (app *App) ProcessBlock(ctx sdk.Context, txs [][]byte, req BlockProcessRequ
 	switch err {
 	case nil:
 		// Only run concurrently if no error
-		txResults = app.ProcessBlockConcurrent(ctx, txs, dependencyDag.CompletionSignalingMap, dependencyDag.BlockingSignalsMap)
+
+		// Branch off the current context and pass a cached context to the concurrent delivered TXs that are shared
+		processBlockCtx, processBlockCache := app.CacheContext(ctx)
+		txResults = app.ProcessBlockConcurrent(processBlockCtx, txs, dependencyDag.CompletionSignalingMap, dependencyDag.BlockingSignalsMap)
+		// Write the results back to the concurrent contexts
+		processBlockCache.Write()
 	case acltypes.ErrGovMsgInBlock:
 		ctx.Logger().Info(fmt.Sprintf("Gov msg found while building DAG, processing synchronously: %s", err))
 		txResults = app.ProcessBlockSynchronous(ctx, txs)
