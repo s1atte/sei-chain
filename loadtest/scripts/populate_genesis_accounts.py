@@ -34,18 +34,19 @@ def add_genesis_account(account_name, lock, local=False):
             "mnemonic": mnemonic,
         }
         json.dump(data, f)
-    success = False
     retry_counter = 5
     sleep_time = 1
-    while not success and retry_counter > 0:
+
+    while retry_counter > 0:
         try:
             with lock:
+                print(f'Running: ${add_account_cmd}')
                 subprocess.check_call(
                     [add_account_cmd],
                     shell=True,
                     timeout=20,
                 )
-                success = True
+            break
         except subprocess.CalledProcessError as e:
             print(f"Encountered error {e}, retrying {retry_counter - 1} times")
             retry_counter -= 1
