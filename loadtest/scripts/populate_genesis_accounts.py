@@ -126,9 +126,8 @@ def main():
 
     num_threads = number_of_accounts // PARALLEISM
     threads = []
-    lock=threading.Lock()
     for i in range(0, number_of_accounts, num_threads):
-        threads.append(threading.Thread(target=bulk_create_genesis_accounts, args=(num_threads, i, lock, is_local)))
+        threads.append(threading.Thread(target=bulk_create_genesis_accounts, args=(num_threads, i, is_local)))
 
     print("Starting threads account")
     for t in threads:
