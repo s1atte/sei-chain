@@ -46,7 +46,7 @@ def add_account(account_name, address, mnemonic, local=False):
 
     return add_account_cmd
 
-def create_genesis_account(account_index, account_name, lock, local=False):
+def create_genesis_account(account_index, account_name, local=False):
     address, mnemonic = add_key(account_name=account_name, local=local)
     add_account_cmd = add_account(account_name=account_name, address=address, mnemonic=mnemonic, local=local)
 
@@ -87,11 +87,24 @@ def create_genesis_account(account_index, account_name, lock, local=False):
         }
     }
 
-def bulk_create_genesis_accounts(number_of_accounts, start_idx, lock, is_local=False):
+def bulk_create_genesis_accounts(number_of_accounts, start_idx, is_local=False):
     for i in range(start_idx, start_idx + number_of_accounts):
-        create_genesis_account(i, f"ta{i}", lock, is_local)
+        create_genesis_account(i, f"ta{i}", is_local)
         print(f"Created account {i}")
 
+
+def update_genesis_file(old_genesis_json):
+    sorted_keys = sorted(list(global_accounts_mapping.keys()))
+    account_info = [0] * len(sorted_keys)
+    balances = [0] * len(sorted_keys)
+    for key in sorted_keys:
+        balances[i] = global_accounts_mapping[key]["balance"]
+        account_info[i] = global_accounts_mapping[key]["account"]
+
+    old_genesis_json["app_state"]["bank"]["balances"] = old_genesis_json["app_state"]["bank"]["balances"] + balances
+    old_genesis_json["app_state"]["auth"]["accounts"] = old_genesis_json["app_state"]["auth"]["accounts"] + account_info
+    print(f'Writing {len(account_info)} and {len(balances)}')
+    write_genesis_file(old_genesis_json)
 
 def read_genesis_file():
     with open("/root/.sei/config/genesis.json", 'r') as f:
@@ -117,11 +130,11 @@ def main():
     for i in range(0, number_of_accounts, num_threads):
         threads.append(threading.Thread(target=bulk_create_genesis_accounts, args=(num_threads, i, lock, is_local)))
 
-    print(f"Starting threads account {i}")
+    print("Starting threads account")
     for t in threads:
         t.start()
 
-    print(f"Waiting for threads {i}")
+    print("Waiting for threads")
     for t in threads:
         t.join()
 
@@ -129,12 +142,16 @@ def main():
     account_info = [0] * len(sorted_keys)
     balances = [0] * len(sorted_keys)
     for key in sorted_keys:
-        balances[i] = global_accounts_mapping[key]["balance"]
-        account_info[i] = global_accounts_mapping[key]["account"]
+        balances[key] = global_accounts_mapping[key]["balance"]
+        account_info[key] = global_accounts_mapping[key]["account"]
 
     genesis_file["app_state"]["bank"]["balances"] = genesis_file["app_state"]["bank"]["balances"] + balances
     genesis_file["app_state"]["auth"]["accounts"] = genesis_file["app_state"]["auth"]["accounts"] + account_info
-    print(f'Writing {len(account_info)} and {len(balances)}')
+
+    num_accounts_created = len([account for account in account_info if account != 0])
+    print(f'Created {num_accounts_created} accounts')
+
+    assert num_accounts_created > number_of_accounts
     write_genesis_file(genesis_file)
 
 if __name__ == "__main__":
