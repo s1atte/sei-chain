@@ -137,21 +137,7 @@ def main():
     for t in threads:
         t.join()
 
-    sorted_keys = sorted(list(global_accounts_mapping.keys()))
-    account_info = [0] * len(sorted_keys)
-    balances = [0] * len(sorted_keys)
-    for key in sorted_keys:
-        balances[key] = global_accounts_mapping[key]["balance"]
-        account_info[key] = global_accounts_mapping[key]["account"]
-
-    genesis_file["app_state"]["bank"]["balances"] = genesis_file["app_state"]["bank"]["balances"] + balances
-    genesis_file["app_state"]["auth"]["accounts"] = genesis_file["app_state"]["auth"]["accounts"] + account_info
-
-    num_accounts_created = len([account for account in account_info if account != 0])
-    print(f'Created {num_accounts_created} accounts')
-
-    assert num_accounts_created > number_of_accounts
-    write_genesis_file(genesis_file)
+    update_genesis_file(genesis_file)
 
 if __name__ == "__main__":
     main()
