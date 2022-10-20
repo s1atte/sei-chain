@@ -130,6 +130,7 @@ def main():
     print("Waiting for threads")
     for t in threads:
         t.join()
+    print(f"Created {len(number_of_accounts)} Accounts")
 
     sorted_keys = sorted(list(global_accounts_mapping.keys()))
     account_info = [0] * len(sorted_keys)
