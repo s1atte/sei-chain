@@ -1,5 +1,5 @@
 {
-    "batch_size": 10,
+    "batch_size": 1,
     "chain_id": "sei-loadtest-testnet",
     "orders_per_block": 4000,
     "rounds": 5,
