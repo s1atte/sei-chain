@@ -3,6 +3,8 @@ package keeper
 import (
 	"bytes"
 	"crypto/sha256"
+	"encoding/binary"
+	"encoding/hex"
 
 	"github.com/sei-protocol/sei-chain/x/nitro/types"
 )
@@ -38,4 +40,19 @@ func (k *Keeper) Validate(root []byte, proof *types.MerkleProof) error {
 func Hash(val1, val2 []byte) []byte {
 	sum := sha256.Sum256(append(val1, val2...))
 	return sum[:]
+}
+
+func AccountToValue(account types.Account) ([]byte, error) {
+	value := [sha256.Size]byte{}
+	lamportbz := make([]byte, 8)
+	binary.BigEndian.PutUint64(lamportbz, uint64(account.Lamports))
+	rentepochbz := make([]byte, 8)
+	binary.BigEndian.PutUint64(rentepochbz, uint64(account.RentEpoch))
+	databz, err := hex.DecodeString(account.Data)
+	if err != nil {
+		return nil, err
+	}
+	value = sha256.Sum256(append(append(lamportbz, rentepochbz...), databz...))
+
+	return value[:], nil
 }

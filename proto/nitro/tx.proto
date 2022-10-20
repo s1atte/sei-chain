@@ -3,6 +3,7 @@ package seiprotocol.seichain.nitro;
 
 import "gogoproto/gogo.proto";
 import "nitro/data.proto"; 
+import "nitro/account.proto"; 
 
 option go_package = "github.com/sei-protocol/sei-chain/x/nitro/types";
 
@@ -36,11 +37,17 @@ message MsgSubmitFraudChallenge {
     uint64 endSlot = 3 [
         (gogoproto.jsontag) = "end_slot"
     ];
-    string fraudState = 4 [
-        (gogoproto.jsontag) = "fraud_state"
+    string fraudStatePubKey = 4 [
+        (gogoproto.jsontag) = "fraud_state_pub_key"
     ];
     MerkleProof merkleProof = 5 [
         (gogoproto.jsontag) = "merkle_proof"
+    ];
+    repeated Account accountStates = 6 [
+        (gogoproto.jsontag) = "account_states"
+    ];
+    repeated Account programs = 7 [
+        (gogoproto.jsontag) = "programs"
     ];
 }
 
