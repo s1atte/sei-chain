@@ -35,7 +35,8 @@ func SendTx(
 			},
 		)
 		if err != nil {
-			panic(err)
+			return
+			// panic(err)
 		}
 		for grpcRes.TxResponse.Code == sdkerrors.ErrMempoolIsFull.ABCICode() {
 			// retry after a second until either succeed or fail for some other reason
