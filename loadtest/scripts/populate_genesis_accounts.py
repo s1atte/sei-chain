@@ -91,6 +91,28 @@ def create_genesis_account(account_index, account_name, local=False):
         }
     }
 
+    if retry_counter >= 1000:
+        exit(-1)
+
+    global_accounts_mapping[account_index] = {
+        "balance": {
+            "address": address,
+            "coins": [
+                {
+                    "denom": "usei",
+                    "amount": "1000000000"
+                }
+            ]
+        },
+        "account": {
+          "@type": "/cosmos.auth.v1beta1.BaseAccount",
+          "address": address,
+          "pub_key": None,
+          "account_number": "0",
+          "sequence": "0"
+        }
+    }
+
 
 def bulk_create_genesis_accounts(number_of_accounts, start_idx, is_local=False):
     for i in range(start_idx, start_idx + number_of_accounts):
