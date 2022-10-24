@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"fmt"
-	"sync"
 	"time"
 
 	"github.com/cosmos/cosmos-sdk/client"
@@ -18,17 +17,17 @@ func SendTx(
 	txBuilder *client.TxBuilder,
 	mode typestx.BroadcastMode,
 	seqDelta uint64,
-	mu *sync.Mutex,
 	failureExpected bool,
-) func() string {
+	loadtestClient LoadTestClient,
+) func() {
 	(*txBuilder).SetGasLimit(200000000)
 	(*txBuilder).SetFeeAmount([]sdk.Coin{
 		sdk.NewCoin("usei", sdk.NewInt(10000000)),
 	})
-	SignTx(txBuilder, key, seqDelta)
+	loadtestClient.SignerClient.SignTx(loadtestClient.ChainID, txBuilder, key, seqDelta)
 	txBytes, _ := TestConfig.TxConfig.TxEncoder()((*txBuilder).GetTx())
-	return func() string {
-		grpcRes, err := TxClient.BroadcastTx(
+	return func() {
+		grpcRes, err := loadtestClient.TxClient.BroadcastTx(
 			context.Background(),
 			&typestx.BroadcastTxRequest{
 				Mode:    mode,
@@ -46,7 +45,7 @@ func SendTx(
 			// retry after a second until either succeed or fail for some other reason
 			fmt.Printf("Mempool full\n")
 			time.Sleep(1 * time.Second)
-			grpcRes, err = TxClient.BroadcastTx(
+			grpcRes, err = loadtestClient.TxClient.BroadcastTx(
 				context.Background(),
 				&typestx.BroadcastTxRequest{
 					Mode:    mode,
@@ -64,12 +63,7 @@ func SendTx(
 		if grpcRes.TxResponse.Code != 0 {
 			fmt.Printf("Error: %d, %s\n", grpcRes.TxResponse.Code, grpcRes.TxResponse.RawLog)
 		} else {
-			mu.Lock()
-			defer mu.Unlock()
-			if _, err := TxHashFile.WriteString(fmt.Sprintf("%s\n", grpcRes.TxResponse.TxHash)); err != nil {
-				panic(err)
-			}
-			return grpcRes.TxResponse.TxHash
+			loadtestClient.AppendTxHash(grpcRes.TxResponse.TxHash)
 		}
 		return ""
 	}
