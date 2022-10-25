@@ -22,6 +22,10 @@
             "delegate_percentage": "0.5",
             "undelegate_percentage": "0.25",
             "begin_redelegate_percentage": "0.25"
+        },
+        "tokenfactory" : {
+            "mint_percentage": "0.5",
+            "burn_percentage": "0.5"
         }
     },
     "message_type": "basic",

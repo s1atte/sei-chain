@@ -46,39 +46,57 @@ type DexMsgTypeDistribution struct {
 	LimitOrderPct  sdk.Dec `json:"limit_order_percentage"`
 	MarketOrderPct sdk.Dec `json:"market_order_percentage"`
 }
-
 type StakingMsgTypeDistribution struct {
 	DelegatePct        sdk.Dec `json:"delegate_percentage"`
 	UndelegatePct      sdk.Dec `json:"undelegate_percentage"`
 	BeginRedelegatePct sdk.Dec `json:"begin_redelegate_percentage"`
 }
+
+type TokenFactoryMsgTypeDistribution struct {
+	TokenFactoryMintPct sdk.Dec `json:"token_factory_mint_percentage"`
+	TokenFactoryBurnPct sdk.Dec `json:"token_factory_burn_percentage"`
+}
+
 type MsgTypeDistribution struct {
 	Dex     DexMsgTypeDistribution     `json:"dex"`
 	Staking StakingMsgTypeDistribution `json:"staking"`
+	TokenFactory TokenFactoryMsgTypeDistribution `json:"tokenfactory"`
 }
 
-func (d *MsgTypeDistribution) SampleDexMsgs() string {
-	if !d.Dex.LimitOrderPct.Add(d.Dex.MarketOrderPct).Equal(sdk.OneDec()) {
-		panic("Distribution percentages must add up to 1")
+func (d *MsgTypeDistribution) Sample(subset string) string {
+	switch subset {
+	case "dex":
+		if !d.Dex.LimitOrderPct.Add(d.Dex.MarketOrderPct).Equal(sdk.OneDec()) {
+			panic("Distribution percentages must add up to 1")
+		}
+		randNum := sdk.MustNewDecFromStr(fmt.Sprintf("%f", rand.Float64()))
+		if randNum.LT(d.Dex.LimitOrderPct) {
+			return "limit"
+		}
+		return "market"
+	case "tokenfactory":
+		if !d.TokenFactory.TokenFactoryBurnPct.Add(d.TokenFactory.TokenFactoryMintPct).Equal(sdk.OneDec()) {
+			panic("Distribution percentages must add up to 1")
+		}
+		randNum := sdk.MustNewDecFromStr(fmt.Sprintf("%f", rand.Float64()))
+		if randNum.LT(d.TokenFactory.TokenFactoryBurnPct) {
+			return "burn"
+		}
+		return "mint"
+	case "staking":
+		if !d.Staking.DelegatePct.Add(d.Staking.UndelegatePct).Add(d.Staking.BeginRedelegatePct).Equal(sdk.OneDec()) {
+			panic("Distribution percentages must add up to 1")
+		}
+		randNum := sdk.MustNewDecFromStr(fmt.Sprintf("%f", rand.Float64()))
+		if randNum.LT(d.Staking.DelegatePct) {
+			return "delegate"
+		} else if randNum.LT(d.Staking.DelegatePct.Add(d.Staking.UndelegatePct)) {
+			return "undelegate"
+		}
+		return "begin_redelegate"
+	default:
+		panic(fmt.Sprintf("Invalid subset=%s of messages passed in", subset))
 	}
-	randNum := sdk.MustNewDecFromStr(fmt.Sprintf("%f", rand.Float64()))
-	if randNum.LT(d.Dex.LimitOrderPct) {
-		return "limit"
-	}
-	return "market"
-}
-
-func (d *MsgTypeDistribution) SampleStakingMsgs() string {
-	if !d.Staking.DelegatePct.Add(d.Staking.UndelegatePct).Add(d.Staking.BeginRedelegatePct).Equal(sdk.OneDec()) {
-		panic("Distribution percentages must add up to 1")
-	}
-	randNum := sdk.MustNewDecFromStr(fmt.Sprintf("%f", rand.Float64()))
-	if randNum.LT(d.Staking.DelegatePct) {
-		return "delegate"
-	} else if randNum.LT(d.Staking.DelegatePct.Add(d.Staking.UndelegatePct)) {
-		return "undelegate"
-	}
-	return "begin_redelegate"
 }
 
 type ContractDistributions []ContractDistribution

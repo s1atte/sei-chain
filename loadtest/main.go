@@ -20,6 +20,7 @@ import (
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 	"github.com/sei-protocol/sei-chain/app"
 	dextypes "github.com/sei-protocol/sei-chain/x/dex/types"
+	tokenfactorytypes "github.com/sei-protocol/sei-chain/x/tokenfactory/types"
 )
 
 var TestConfig EncodingConfig
@@ -72,35 +73,38 @@ func run() {
 
 func generateMessage(config Config, key cryptotypes.PrivKey, msgPerTx uint64, validators []Validator) sdk.Msg {
 	var msg sdk.Msg
-	switch config.MessageType {
+	messageType := config.MessageType
+
+	addr := sdk.AccAddress(key.PubKey().Address()).String()
+	switch messageType {
 	case "basic":
 		msg = &banktypes.MsgSend{
-			FromAddress: sdk.AccAddress(key.PubKey().Address()).String(),
-			ToAddress:   sdk.AccAddress(key.PubKey().Address()).String(),
+			FromAddress: addr,
+			ToAddress:   addr,
 			Amount: sdk.NewCoins(sdk.Coin{
 				Denom:  "usei",
 				Amount: sdk.NewInt(1),
 			}),
 		}
 	case "staking":
-		msgType := config.MsgTypeDistr.SampleStakingMsgs()
+		msgType := config.MsgTypeDistr.Sample(messageType)
 
 		switch msgType {
 		case "delegate":
 			msg = &stakingtypes.MsgDelegate{
-				DelegatorAddress: sdk.AccAddress(key.PubKey().Address()).String(),
+				DelegatorAddress: addr,
 				ValidatorAddress: validators[rand.Intn(len(validators))].OpperatorAddr,
 				Amount:           sdk.Coin{Denom: "usei", Amount: sdk.NewInt(5)},
 			}
 		case "undelegate":
 			msg = &stakingtypes.MsgUndelegate{
-				DelegatorAddress: sdk.AccAddress(key.PubKey().Address()).String(),
+				DelegatorAddress: addr,
 				ValidatorAddress: validators[rand.Intn(len(validators))].OpperatorAddr,
 				Amount:           sdk.Coin{Denom: "usei", Amount: sdk.NewInt(1)},
 			}
 		case "begin_redelegate":
 			msg = &stakingtypes.MsgBeginRedelegate{
-				DelegatorAddress:    sdk.AccAddress(key.PubKey().Address()).String(),
+				DelegatorAddress:    addr,
 				ValidatorSrcAddress: validators[rand.Intn(len(validators))].OpperatorAddr,
 				ValidatorDstAddress: validators[rand.Intn(len(validators))].OpperatorAddr,
 				Amount:              sdk.Coin{Denom: "usei", Amount: sdk.NewInt(1)},
@@ -108,8 +112,28 @@ func generateMessage(config Config, key cryptotypes.PrivKey, msgPerTx uint64, va
 		default:
 			panic("Unknown message type")
 		}
+	case "tokenfactory":
+		msgType := config.MsgTypeDistr.Sample(messageType)
+
+		// Template defined in populate_genesis_accounts.py
+		denom := fmt.Sprintf("factory/%s/token", addr)
+
+		switch msgType {
+		case "mint":
+			msg = &tokenfactorytypes.MsgMint{
+				Sender: addr,
+				Amount: sdk.Coin{Denom: denom, Amount: sdk.NewInt(1)},
+			}
+		case "burn":
+			msg = &tokenfactorytypes.MsgBurn{
+				Sender: addr,
+				Amount: sdk.Coin{Denom: denom, Amount: sdk.NewInt(1)},
+			}
+		default:
+			panic("Unknown tokenfactory message type")
+		}
 	case "dex":
-		msgType := config.MsgTypeDistr.SampleDexMsgs()
+		msgType := config.MsgTypeDistr.Sample(messageType)
 		orderPlacements := []*dextypes.Order{}
 		var orderType dextypes.OrderType
 		if msgType == "limit" {
@@ -128,7 +152,7 @@ func generateMessage(config Config, key cryptotypes.PrivKey, msgPerTx uint64, va
 		contract := config.ContractDistr.Sample()
 		for j := 0; j < int(msgPerTx); j++ {
 			orderPlacements = append(orderPlacements, &dextypes.Order{
-				Account:           sdk.AccAddress(key.PubKey().Address()).String(),
+				Account:           addr,
 				ContractAddr:      contract,
 				PositionDirection: direction,
 				Price:             price.Quo(FromMili),
@@ -144,7 +168,7 @@ func generateMessage(config Config, key cryptotypes.PrivKey, msgPerTx uint64, va
 			panic(err)
 		}
 		msg = &dextypes.MsgPlaceOrders{
-			Creator:      sdk.AccAddress(key.PubKey().Address()).String(),
+			Creator:      addr,
 			Orders:       orderPlacements,
 			ContractAddr: contract,
 			Funds:        amount,

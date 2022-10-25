@@ -68,10 +68,10 @@ def create_genesis_account(account_index, account_name, local=False):
             retry_counter += 1
             sleep_time += 0.5
             time.sleep(sleep_time)
-    
+
     if retry_counter >= 1000:
         exit(-1)
-    
+
     global_accounts_mapping[account_index] = {
         "balance": {
             "address": address,
@@ -88,6 +88,12 @@ def create_genesis_account(account_index, account_name, local=False):
           "pub_key": None,
           "account_number": "0",
           "sequence": "0"
+        },
+        "tokenfactory": {
+            "denom": f"factory/{address}/test",
+            "authority_metadata": {
+                "admin": address
+            }
         }
     }
 
@@ -96,7 +102,6 @@ def bulk_create_genesis_accounts(number_of_accounts, start_idx, is_local=False):
     for i in range(start_idx, start_idx + number_of_accounts):
         create_genesis_account(i, f"ta{i}", is_local)
         print(f"Created account {i}")
-
 
 def read_genesis_file():
     with open("/root/.sei/config/genesis.json", 'r') as f:
@@ -134,12 +139,15 @@ def main():
     sorted_keys = sorted(list(global_accounts_mapping.keys()))
     account_info = [0] * len(sorted_keys)
     balances = [0] * len(sorted_keys)
+    factory_denoms = [0] * len(sorted_keys)
     for key in sorted_keys:
         balances[key] = global_accounts_mapping[key]["balance"]
         account_info[key] = global_accounts_mapping[key]["account"]
+        factory_denoms[key] = global_accounts_mapping[key]["tokenfactory"]
 
     genesis_file["app_state"]["bank"]["balances"] = genesis_file["app_state"]["bank"]["balances"] + balances
     genesis_file["app_state"]["auth"]["accounts"] = genesis_file["app_state"]["auth"]["accounts"] + account_info
+    genesis_file["app_state"]["tokenfactory"]["factory_denoms"] = genesis_file["app_state"]["tokenfactory"]["factory_denoms"] + factory_denoms
 
     num_accounts_created = len([account for account in account_info if account != 0])
     print(f'Created {num_accounts_created} accounts')
