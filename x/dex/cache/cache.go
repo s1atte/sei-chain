@@ -100,6 +100,7 @@ func (s *MemState) GetAllBlockOrders(ctx sdk.Context, contractAddr typesutils.Co
 }
 
 func (s *MemState) GetBlockOrders(ctx sdk.Context, contractAddr typesutils.ContractAddress, pair typesutils.PairString) *BlockOrders {
+	fmt.Println("~~ Get Block Orders")
 	s.SynchronizeAccess(ctx, contractAddr)
 	ordersForPair, _ := s.blockOrders.LoadOrStoreNested(contractAddr, pair, NewOrders())
 	return ordersForPair
