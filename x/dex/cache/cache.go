@@ -163,6 +163,7 @@ func (s *MemState) SynchronizeAccess(ctx sdk.Context, contractAddr typesutils.Co
 		// access by the contract itself does not need synchronization
 		return
 	}
+	fmt.Println("~~~ 4")
 	for _, dependency := range executingContract.Dependencies {
 		fmt.Println("~~~ 2")
 		if dependency.Dependency != targetContractAddr {
