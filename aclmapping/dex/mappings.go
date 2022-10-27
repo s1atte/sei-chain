@@ -48,16 +48,16 @@ func DexPlaceOrdersDependencyGenerator(keeper aclkeeper.Keeper, ctx sdk.Context,
 
 		// Questions? What is a executingContract?
 
-		{
-			AccessType:         sdkacltypes.AccessType_READ,
-			ResourceType:       sdkacltypes.ResourceType_KV_DEX,
-			IdentifierTemplate: "*",
-		},
-		{
-			AccessType:         sdkacltypes.AccessType_WRITE,
-			ResourceType:       sdkacltypes.ResourceType_KV_DEX,
-			IdentifierTemplate: "*",
-		},
+		// {
+		// 	AccessType:         sdkacltypes.AccessType_READ,
+		// 	ResourceType:       sdkacltypes.ResourceType_KV_DEX,
+		// 	IdentifierTemplate: "*",
+		// },
+		// {
+		// 	AccessType:         sdkacltypes.AccessType_WRITE,
+		// 	ResourceType:       sdkacltypes.ResourceType_KV_DEX,
+		// 	IdentifierTemplate: "*",
+		// },
 
 		{
 			AccessType:         sdkacltypes.AccessType_READ,
