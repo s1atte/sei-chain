@@ -35,9 +35,12 @@ func (i *memStateItems[T]) Get() []T {
 }
 
 func (i *memStateItems[T]) Add(newItem T) {
+	fmt.Println("~~~ Try to add to the MemState Block Orders")
 	i.mu.Lock()
+	fmt.Println("~~~ Got the MemState Block Orders lock")
 	defer i.mu.Unlock()
 	i.internal = append(i.internal, newItem)
+	fmt.Println("~~~ Appended the item into the block")
 }
 
 func (i *memStateItems[T]) FilterByAccount(account string) {
@@ -100,10 +103,11 @@ func (s *MemState) GetAllBlockOrders(ctx sdk.Context, contractAddr typesutils.Co
 }
 
 func (s *MemState) GetBlockOrders(ctx sdk.Context, contractAddr typesutils.ContractAddress, pair typesutils.PairString) *BlockOrders {
-	fmt.Println("~~~ Get Block Orders")
+	fmt.Println("~~~ Get Block Order: " + contractAddr)
 	s.SynchronizeAccess(ctx, contractAddr)
-	fmt.Println("~~~ Successfully got the key")
+	fmt.Println("~~~ Successfully got the key: " + contractAddr)
 	ordersForPair, _ := s.blockOrders.LoadOrStoreNested(contractAddr, pair, NewOrders())
+	fmt.Println("~~~ Successfully got the block: " + contractAddr)
 	return ordersForPair
 }
 
@@ -153,7 +157,7 @@ func (s *MemState) DeepFilterAccount(account string) {
 }
 
 func (s *MemState) SynchronizeAccess(ctx sdk.Context, contractAddr typesutils.ContractAddress) {
-	fmt.Println("~~~ 1")
+	fmt.Println("~~~ 1: " + contractAddr)
 	executingContract := GetExecutingContract(ctx)
 	if executingContract == nil {
 		// not accessed by contract. no need to synchronize
@@ -164,7 +168,7 @@ func (s *MemState) SynchronizeAccess(ctx sdk.Context, contractAddr typesutils.Co
 		// access by the contract itself does not need synchronization
 		return
 	}
-	fmt.Println("~~~ 4")
+	fmt.Println("~~~ 4: " + contractAddr)
 	for _, dependency := range executingContract.Dependencies {
 		fmt.Println("~~~ 2")
 		if dependency.Dependency != targetContractAddr {
