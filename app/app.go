@@ -1003,7 +1003,7 @@ func (app *App) ProcessTxConcurrent(
 	ctx = ctx.WithTxCompletionChannels(getChannelsFromSignalMapping(txCompletionSignalingMap))
 
 	// Deliver the transaction and store the result in the channel
-
+	fmt.Println("~~~ txIndex: ", txIndex)
 	resultChan <- ChannelResult{txIndex, app.DeliverTxWithResult(ctx, txBytes)}
 	metrics.IncrTxProcessTypeCounter(metrics.CONCURRENT)
 }
