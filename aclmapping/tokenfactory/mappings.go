@@ -106,32 +106,32 @@ func TokenFactoryBurnDependencyGenerator(keeper aclkeeper.Keeper, ctx sdk.Contex
 		// Gets Module Account information
 		{
 			AccessType:         sdkacltypes.AccessType_READ,
-			ResourceType:       sdkacltypes.ResourceType_KV,
-			IdentifierTemplate: utils.GetIdentifierTemplatePerModule(utils.AUTH, tokenfactorymoduletypes.ModuleName),
+			ResourceType:       sdkacltypes.ResourceType_KV_AUTH,
+			IdentifierTemplate:  tokenfactorymoduletypes.ModuleName,
 		},
 
 		// Sends from Sender to Module account (deferred deposit)
 		{
 			AccessType:         sdkacltypes.AccessType_READ,
 			ResourceType:       sdkacltypes.ResourceType_KV_BANK,
-			IdentifierTemplate: utils.GetIdentifierTemplatePerModule(utils.BANK, burnMsg.Sender),
+			IdentifierTemplate: burnMsg.Sender,
 		},
 		{
 			AccessType:         sdkacltypes.AccessType_WRITE,
 			ResourceType:       sdkacltypes.ResourceType_KV_BANK,
-			IdentifierTemplate: utils.GetIdentifierTemplatePerModule(utils.BANK, burnMsg.Sender),
+			IdentifierTemplate: burnMsg.Sender,
 		},
 
 		// Sends coins to the msgSender
 		{
 			AccessType:         sdkacltypes.AccessType_READ,
 			ResourceType:       sdkacltypes.ResourceType_KV_BANK,
-			IdentifierTemplate: utils.GetIdentifierTemplatePerModule(utils.BANK, burnMsg.Sender),
+			IdentifierTemplate:  burnMsg.Sender,
 		},
 		{
 			AccessType:         sdkacltypes.AccessType_WRITE,
 			ResourceType:       sdkacltypes.ResourceType_KV_BANK,
-			IdentifierTemplate: utils.GetIdentifierTemplatePerModule(utils.BANK, burnMsg.Sender),
+			IdentifierTemplate:  burnMsg.Sender,
 		},
 
 		// Coins removed from Module account (Deferred)
@@ -147,6 +147,13 @@ func TokenFactoryBurnDependencyGenerator(keeper aclkeeper.Keeper, ctx sdk.Contex
 			AccessType:         sdkacltypes.AccessType_WRITE,
 			ResourceType:       sdkacltypes.ResourceType_KV_BANK,
 			IdentifierTemplate: utils.GetIdentifierTemplatePerModule("supply", denom),
+		},
+
+		// Last Operation should always be a commit
+		{
+			ResourceType:       sdkacltypes.ResourceType_ANY,
+			AccessType:         sdkacltypes.AccessType_COMMIT,
+			IdentifierTemplate: utils.DefaultIDTemplate,
 		},
 	}, nil
 }
