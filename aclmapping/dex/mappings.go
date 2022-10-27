@@ -49,6 +49,12 @@ func DexPlaceOrdersDependencyGenerator(keeper aclkeeper.Keeper, ctx sdk.Context,
 		// Questions? What is a executingContract?
 
 		{
+			AccessType:         sdkacltypes.AccessType_WRITE,
+			ResourceType:       sdkacltypes.ResourceType_KV,
+			IdentifierTemplate: "*",
+		},
+
+		{
 			AccessType:         sdkacltypes.AccessType_READ,
 			ResourceType:       sdkacltypes.ResourceType_KV_DEX,
 			IdentifierTemplate: utils.GetIdentifierTemplatePerModule(utils.DEX, placeOrdersMsg.ContractAddr),
@@ -79,6 +85,12 @@ func DexCancelOrdersDependencyGenerator(keeper aclkeeper.Keeper, ctx sdk.Context
 		// GemMemState.GetBlockCancels will get all cancellations for a specific block
 		// 	will iterate over all cancel to verify it hasn't been cancelled in a previous tx in the same block
 		//	if the orderID is not already cancelled, ADD it into the MemState
+
+		{
+			AccessType:         sdkacltypes.AccessType_WRITE,
+			ResourceType:       sdkacltypes.ResourceType_KV,
+			IdentifierTemplate: "*",
+		},
 
 		{
 			AccessType:         sdkacltypes.AccessType_READ,
