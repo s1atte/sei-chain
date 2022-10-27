@@ -151,6 +151,7 @@ func (s *MemState) DeepFilterAccount(account string) {
 }
 
 func (s *MemState) SynchronizeAccess(ctx sdk.Context, contractAddr typesutils.ContractAddress) {
+	fmt.Println("~~~ 1")
 	executingContract := GetExecutingContract(ctx)
 	if executingContract == nil {
 		// not accessed by contract. no need to synchronize
@@ -162,6 +163,7 @@ func (s *MemState) SynchronizeAccess(ctx sdk.Context, contractAddr typesutils.Co
 		return
 	}
 	for _, dependency := range executingContract.Dependencies {
+		fmt.Println("~~~ 2")
 		if dependency.Dependency != targetContractAddr {
 			continue
 		}
@@ -181,6 +183,7 @@ func (s *MemState) SynchronizeAccess(ctx sdk.Context, contractAddr typesutils.Co
 			// since buffered channel can only be consumed once, we need to
 			// requeue so that it can unblock other goroutines that waits for
 			// the same channel.
+			fmt.Println("~~~ 3")
 			targetChannel <- struct{}{}
 		case <-time.After(SynchronizationTimeoutInSeconds * time.Second):
 			// synchronization should fail in the case of timeout to prevent race conditions.
