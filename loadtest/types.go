@@ -61,8 +61,8 @@ type MsgTypeDistribution struct {
 }
 
 type OrderTypeDistribution struct {
-	LimitOrderPct  sdk.Dec `json:"limit_order_pct"`
-	MarketOrderPct sdk.Dec `json:"market_order_pct"`
+	LimitOrderPct  sdk.Dec `json:"limit_order_percentage"`
+	MarketOrderPct sdk.Dec `json:"market_order_percentage"`
 }
 
 func (d *OrderTypeDistribution) SampleOrderType() dextypes.OrderType {
