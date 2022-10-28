@@ -15,14 +15,18 @@
     },
     "message_type_distribution": {
         "dex": {
-            "limit_order_percentage": "0.2",
-            "market_order_percentage": "0.8"
+            "place_order_percentage": "0.0",
+            "cancel_order_percentage": "1.0"
         },
         "staking": {
             "delegate_percentage": "0.5",
             "undelegate_percentage": "0.25",
             "begin_redelegate_percentage": "0.25"
         }
+    },
+    "order_type_distribution": {
+        "limit_order_percentage": "0.2",
+        "market_order_percentage": "0.8"
     },
     "message_type": "dex",
     "run_oracle": true,
