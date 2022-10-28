@@ -15,8 +15,8 @@
     },
     "message_type_distribution": {
         "dex": {
-            "place_order_percentage": "0.0",
-            "cancel_order_percentage": "1.0"
+            "place_order_percentage": "0.5",
+            "cancel_order_percentage": "0.5"
         },
         "staking": {
             "delegate_percentage": "0.5",
