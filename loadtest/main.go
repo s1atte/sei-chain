@@ -150,15 +150,20 @@ func generateMessage(c *LoadTestClient, key cryptotypes.PrivKey, msgPerTx uint64
 				Funds:        amount,
 			}
 		case "cancel_order":
-			contract := c.LoadTestConfig.ContractDistr.Sample()
+			var contract string
 			var outstandingOrders []*dextypes.Order
-			if resp, err := c.DexQueryClient.GetOrders(context.Background(), &dextypes.QueryGetOrdersRequest{
-				ContractAddr: contract,
-				Account:      sdk.AccAddress(key.PubKey().Address()).String(),
-			}); err != nil {
-				panic(err)
-			} else {
-				outstandingOrders = resp.Orders
+			for _, contractConfig := range c.LoadTestConfig.ContractDistr {
+
+				if resp, err := c.DexQueryClient.GetOrders(context.Background(), &dextypes.QueryGetOrdersRequest{
+					ContractAddr: contractConfig.ContractAddr,
+					Account:      sdk.AccAddress(key.PubKey().Address()).String(),
+				}); err != nil {
+					panic(err)
+				} else if len(resp.Orders) > 0 {
+					contract = contractConfig.ContractAddr
+					outstandingOrders = resp.Orders
+					break
+				}
 			}
 
 			cancelPlacements := []*dextypes.Cancellation{}
