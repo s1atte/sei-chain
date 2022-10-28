@@ -1,7 +1,6 @@
 package datastructures
 
 import (
-	"fmt"
 	"sync"
 )
 
@@ -29,9 +28,7 @@ func (m *TypedSyncMap[K, V]) Store(key K, value V) {
 }
 
 func (m *TypedSyncMap[K, V]) LoadOrStore(key K, value V) (actual V, loaded bool) {
-	fmt.Println("~~~ Write the value: :?", value)
 	untypedVal, loaded := m.internal.LoadOrStore(key, value)
-	fmt.Println("~~~ Successfully wrote the value: :?", value)
 	actual, _ = untypedVal.(V)
 	return
 }
@@ -107,12 +104,10 @@ func (m *TypedNestedSyncMap[K1, K2, V]) StoreNested(key1 K1, key2 K2, value V) {
 }
 
 func (m *TypedNestedSyncMap[K1, K2, V]) LoadOrStoreNested(key1 K1, key2 K2, value V) (actual V, loaded bool) {
-	fmt.Println("~~~ Get Nested Sync Map Lock")
 	m.mu.Lock()
 	defer m.mu.Unlock()
 	nestedMap, _ := m.TypedSyncMap.LoadOrStore(key1, NewTypedSyncMap[K2, V]())
 	actual, loaded = nestedMap.LoadOrStore(key2, value)
-	fmt.Println("~~~ Release Nested Sync Map Lock")
 	return
 }
 

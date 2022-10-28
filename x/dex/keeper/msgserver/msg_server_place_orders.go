@@ -49,7 +49,6 @@ func (k msgServer) transferFunds(goCtx context.Context, msg *types.MsgPlaceOrder
 }
 
 func (k msgServer) PlaceOrders(goCtx context.Context, msg *types.MsgPlaceOrders) (*types.MsgPlaceOrdersResponse, error) {
-	fmt.Println("~~~ replay place order msg: +++" + msg.Creator)
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
 	for _, order := range msg.Orders {
